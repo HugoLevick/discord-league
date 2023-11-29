@@ -29,7 +29,7 @@ export class DiscordBotService {
 
   private signUps: SignUpControlI = {};
   private currentTeams: TeamControlI = {};
-  private allowCheckIns = true;
+  private allowCheckIns = false;
   private readonly logoUrl =
     'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png';
 
@@ -262,7 +262,7 @@ export class DiscordBotService {
   public signUpMember(member: GuildMember, tier: number) {
     this.signUps[member.id] = {
       member,
-      isIn: true,
+      isIn: false,
       tier,
     };
   }
