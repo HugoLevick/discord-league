@@ -38,6 +38,7 @@ async function displaySearchResults(search) {
   results.forEach((user) => {
     const listItem = document.createElement('li');
     listItem.classList.add('list-group-item');
+    listItem.style.cursor = 'pointer';
     listItem.innerHTML = `<strong>${user.name}</strong> (${user.discordId})`;
 
     resultList.addEventListener('click', function (event) {
