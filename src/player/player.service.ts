@@ -74,12 +74,6 @@ export class PlayerService {
     }
   }
   async getPlayerAverageStats(discordId: string) {
-    const stats = await this.playerStatsRepository.find({
-      where: { player: { discordId } },
-      relations: ['player'],
-      take: 36,
-    });
-
     const [totalStats] = await this.playerStatsRepository
       .createQueryBuilder('stats')
       .select([])
@@ -87,6 +81,14 @@ export class PlayerService {
       .addSelect('COUNT(stats.bombs)', 'totalBombs')
       .addSelect('COUNT(stats.hillTime)', 'totalHillTime')
       .execute();
+
+    if (totalStats.totalRows < 24) return null;
+
+    const stats = await this.playerStatsRepository.find({
+      where: { player: { discordId } },
+      relations: ['player'],
+      take: 36,
+    });
 
     const averageStats = {
       downs: this.getStatAverage(

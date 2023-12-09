@@ -413,6 +413,14 @@ export class DiscordBotService {
       player.discordId,
     );
 
+    if (!stats) {
+      await interaction.reply({
+        content: 'You need at least 24 games played to see your stats.',
+        ephemeral: true,
+      });
+      return;
+    }
+
     // if (stats.length < 24) {
     //   await interaction.reply({
     //     content: 'You need at least 24 games played to see your stats.',
@@ -466,7 +474,7 @@ export class DiscordBotService {
         text: `League Bot by @levick. | ${stats.totalGamesPlayed} games played.`,
       });
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed] });
   }
 
   public lookUpSignUp(member: GuildMember) {
