@@ -11,6 +11,8 @@ import {
 
 import { PlayerI } from './interfaces/player.interface';
 import { TeamI } from './interfaces/team.interface';
+import { PlayerService } from 'src/player/player.service';
+import { Player } from 'src/player/entities/player.entity';
 
 interface SignUpControlI {
   [id: string]: PlayerI;
@@ -28,6 +30,7 @@ interface TeamControlI {
 
 @Injectable()
 export class DiscordBotService {
+  constructor(private readonly playerService: PlayerService) {}
   private readonly logger = new Logger('DiscordBotService');
 
   private signUps: SignUpControlI = {};
@@ -49,6 +52,18 @@ export class DiscordBotService {
         !interaction.inCachedGuild() //TypeSafe
       )
         return;
+
+      let player: Player;
+      try {
+        player = await this.playerService.getPlayerByDiscordId(
+          interaction.member.id,
+        );
+      } catch (error) {
+        player = await this.playerService.createPlayer({
+          discordId: interaction.member.id,
+          name: interaction.member.displayName,
+        });
+      }
 
       //*Commands
       switch (interaction.commandName) {
@@ -87,6 +102,10 @@ export class DiscordBotService {
         case 'kick':
           //Kick command
           await this.kickCommand(interaction);
+          break;
+        case 'stats':
+          //Stats command
+          await this.statsCommand(interaction, player);
           break;
         default:
           //Unknown command
@@ -384,6 +403,70 @@ export class DiscordBotService {
     await interaction.reply({
       embeds: [embed],
     });
+  }
+
+  public async statsCommand(
+    interaction: ChatInputCommandInteraction,
+    player: Player,
+  ) {
+    const stats = await this.playerService.getPlayerAverageStats(
+      player.discordId,
+    );
+
+    // if (stats.length < 24) {
+    //   await interaction.reply({
+    //     content: 'You need at least 24 games played to see your stats.',
+    //     ephemeral: true,
+    //   });
+    //   return;
+    // }
+
+    const fields: APIEmbedField[] = [];
+    fields.push({
+      name: 'Downs',
+      value: `${stats.downs}`,
+      inline: true,
+    });
+    fields.push({
+      name: 'Revives',
+      value: `${stats.revives}`,
+      inline: true,
+    });
+    fields.push({
+      name: 'Damage',
+      value: `${stats.damage}`,
+      inline: true,
+    });
+    fields.push({
+      name: 'Bombs',
+      value: stats.bombs ? `${stats.bombs}` : 'N/A',
+      inline: true,
+    });
+    fields.push({
+      name: 'Hill Time',
+      value: stats.hillTime ? `${stats.hillTime}` : 'N/A',
+      inline: true,
+    });
+    fields.push({
+      name: 'Win %',
+      value: stats.won ? `${stats.won * 100}%` : 'Error',
+      inline: true,
+    });
+
+    const embed = new EmbedBuilder()
+      .setColor(0x0099ff)
+      .setTitle(`${player.name}'s Stats`)
+      .setAuthor({
+        name: "Strikeout's league",
+        iconURL: this.logoUrl,
+      })
+      .setThumbnail(this.logoUrl)
+      .addFields(fields)
+      .setFooter({
+        text: `League Bot by @levick. | ${stats.totalGamesPlayed} games played.`,
+      });
+
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
   public lookUpSignUp(member: GuildMember) {

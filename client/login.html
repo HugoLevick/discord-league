@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light d-flex align-items-center">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0 text-center">Login</h3>
+            </div>
+            <div class="card-body">
+              <form class="form" role="form" autocomplete="off">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    required=""
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    required=""
+                  />
+                </div>
+                <div class="form-group">
+                  <button
+                    type="button"
+                    class="btn btn-success btn-lg float-right"
+                    onclick="login()"
+                  >
+                    Login
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+      async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (password.length < 4) {
+          alert('Password must be at least 4 characters long');
+          return;
+        }
+
+        await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        })
+          .then((res) => res.json())
+          .then(async (data) => {
+            if (data.statusCode != 200 && !data.hasToSetPassword) {
+              alert('Login failed');
+            } else if (data.hasToSetPassword) {
+              if (
+                confirm(
+                  'You will set your password now. Do you want to continue?',
+                )
+              ) {
+                await fetch('/api/auth/setPassword', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ username, newPassword: password }),
+                })
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.statusCode == 200) {
+                      alert('Password set successfully');
+                      localStorage.setItem('token', data.token);
+                      window.location.href = '/';
+                    } else {
+                      alert('Password set failed');
+                    }
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    alert('Login failed');
+                  });
+              }
+            } else if (data.statusCode == 200) {
+              localStorage.setItem('token', data.token);
+              window.location.href = '/';
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            alert('Login failed');
+          });
+      }
+    </script>
+  </body>
+</html>

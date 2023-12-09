@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registered Mods</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="container-fluid">
+    <div class="row">
+      <!-- Left Panel Menu (Sidebar) -->
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="/">Add Stats</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/editStats.html">Edit Stats</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Edit Mods</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout.html">Logout</a>
+            </li>
+            <!-- Add more menu items as needed -->
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 mt-5">
+        <h1 class="mb-4">Registered People</h1>
+
+        <!-- Add User Button -->
+        <button class="btn btn-success mb-3" onclick="addMod()">Add Mod</button>
+
+        <!-- Registered People Table -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="peopleTableBody"></tbody>
+        </table>
+      </main>
+    </div>
+
+    <script src="js/user.js"></script>
+    <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+      async function setMods() {
+        const token = localStorage.getItem('token');
+
+        let loadedUser = await user;
+        if (loadedUser.role !== 'OWNER') {
+          alert('You are not authorized to view this page');
+          window.location.href = '/';
+        }
+
+        const response = await fetch('/api/auth', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.statusCode == 200) {
+          for (mod of data.data) {
+            insertModInTable(mod.id, mod.username);
+          }
+        }
+      }
+      setMods();
+      async function addMod() {
+        const name = prompt('Enter the name of the new user:');
+        const token = localStorage.getItem('token');
+
+        const response = await fetch('/api/auth/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username: name }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert('User added successfully');
+          insertModInTable(data.id, name);
+        } else {
+          console.log(await response.json());
+        }
+      }
+
+      async function removeUser(id, name, button) {
+        if (confirm(`Are you sure you want to remove ${name}?`) === false)
+          return;
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auth/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const row = button.parentNode.parentNode;
+          const tableBody = row.parentNode;
+          tableBody.removeChild(row);
+        }
+      }
+
+      function insertModInTable(id, name) {
+        const tableBody = document.getElementById('peopleTableBody');
+        const newRow = tableBody.insertRow();
+
+        const nameCell = newRow.insertCell(0);
+        nameCell.textContent = name;
+
+        const actionCell = newRow.insertCell(1);
+        const removeButton = document.createElement('button');
+        removeButton.className = 'btn btn-danger';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function () {
+          removeUser(id, name, this);
+        };
+        actionCell.appendChild(removeButton);
+      }
+    </script>
+  </body>
+</html>

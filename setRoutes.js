@@ -23,46 +23,6 @@ for (const file of commandFiles) {
   }
 }
 
-//[
-//   {
-//     name: 'ping',
-//     description: 'Replies with Pong!',
-//   },
-//   {
-//     name: 'signup',
-//     description: 'Sign Up to a league',
-//   },
-//   {
-//     name: 'signout',
-//     description: 'Sign out of a league',
-//   },
-//   {
-//     name: 'togglecheckin',
-//     description: 'Toggle check ins',
-//   },
-//   {
-//     name: 'checkin',
-//     description: 'Check In to a league',
-//   },
-//   {
-//     name: 'kick',
-//     description: 'Check In to a league',
-//     options,
-//   },
-//   {
-//     name: 'who',
-//     description: 'Display a list of people who signed up',
-//   },
-//   {
-//     name: 'teams',
-//     description: 'Display a list of the current teams',
-//   },
-//   {
-//     name: 'randomize',
-//     description: 'Randomize people who signed up',
-//   },
-// ];
-
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 try {
