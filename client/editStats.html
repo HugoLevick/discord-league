@@ -96,6 +96,12 @@
         tBody.innerHTML = '';
         const stats = await fetch(
           `/api/players/stats/${user.discordId}?all=true`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          },
         )
           .then((res) => res.json())
           .catch((err) => {
@@ -136,6 +142,10 @@
           removeButton.onclick = async function () {
             await fetch(`/api/players/stats/${stat.id}`, {
               method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
             })
               .then((res) => res.json())
               .catch((err) => {

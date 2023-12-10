@@ -21,7 +21,13 @@ async function displaySearchResults(search) {
   }
   const searchResultsElement = document.getElementById('searchResults');
   searchResultsElement.innerHTML = 'Loading...';
-  const results = await fetch('/api/players/search/' + search)
+  const results = await fetch('/api/players/search/' + search, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  })
     .then((res) => res.json())
     .catch((err) => console.error('error', err));
 

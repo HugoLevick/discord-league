@@ -69,6 +69,7 @@ async function sendTableData(event) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
     body: JSON.stringify({ stats: tableData }),
   })
