@@ -10,7 +10,6 @@ import { Repository } from 'typeorm';
 import { UploadStatsDto } from './dto/upload-stats.dto';
 import { PlayerStats } from './entities/player-stats.entity';
 import { CreatePlayerDto } from './dto/create-player.dto';
-import { GetStatsDto } from './dto/get-stats.dto';
 
 @Injectable()
 export class PlayerService {
@@ -41,6 +40,7 @@ export class PlayerService {
     const players = await this.playerRepository
       .createQueryBuilder('player')
       .where('player.name ILIKE :search', { search: `%${search}%` })
+      .orWhere('player.discordId ILIKE :id', { id: `%${search}%` })
       .getMany();
 
     return players;
@@ -151,5 +151,11 @@ export class PlayerService {
       console.log(err);
       throw new InternalServerErrorException();
     }
+  }
+
+  async updatePlayer(player: Player, newName: string) {
+    player.name = newName;
+    await this.playerRepository.save(player);
+    return player;
   }
 }

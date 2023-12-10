@@ -58,6 +58,14 @@ export class DiscordBotService {
         player = await this.playerService.getPlayerByDiscordId(
           interaction.member.id,
         );
+
+        if (player.name !== interaction.member.displayName) {
+          player.name = interaction.member.displayName;
+          await this.playerService.updatePlayer(
+            player,
+            interaction.member.displayName,
+          );
+        }
       } catch (error) {
         player = await this.playerService.createPlayer({
           discordId: interaction.member.id,
