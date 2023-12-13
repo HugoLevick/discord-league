@@ -13,6 +13,9 @@ import { CreatePlayerDto } from './dto/create-player.dto';
 
 @Injectable()
 export class PlayerService {
+  public readonly maxStats = 12;
+  public readonly minStats = 1;
+
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: Repository<Player>,
@@ -73,49 +76,44 @@ export class PlayerService {
       return stat.reduce((a, b) => a + b, 0) / totalStats;
     }
   }
+
   async getPlayerAverageStats(discordId: string) {
-    const [totalStats] = await this.playerStatsRepository
-      .createQueryBuilder('stats')
-      .select([])
-      .addSelect('COUNT(*)', 'totalRows')
-      .addSelect('COUNT(stats.bombs)', 'totalBombs')
-      .addSelect('COUNT(stats.hillTime)', 'totalHillTime')
-      .execute();
-
-    if (totalStats.totalRows < 24) return null;
-
     const stats = await this.playerStatsRepository.find({
       where: { player: { discordId } },
       relations: ['player'],
-      take: 36,
+      take: this.maxStats,
     });
+
+    if (stats.length < this.minStats) return null;
 
     const averageStats = {
       downs: this.getStatAverage(
         stats.map((stat) => stat.downs),
-        totalStats.totalRows,
+        stats.length,
       ),
       revives: this.getStatAverage(
         stats.map((stat) => stat.revives),
-        totalStats.totalRows,
+        stats.length,
       ),
       damage: this.getStatAverage(
         stats.map((stat) => stat.damage),
-        totalStats.totalRows,
+        stats.length,
       ),
       bombs: this.getStatAverage(
         stats.map((stat) => stat.bombs),
-        totalStats.totalBombs,
+        stats.filter((stat) => stat.bombs !== null).length,
       ),
       hillTime: this.getStatAverage(
         stats.map((stat) => stat.hillTime),
-        totalStats.totalHillTime,
+        stats.filter((stat) => stat.hillTime !== null).length,
       ),
       won: this.getStatAverage(
         stats.map((stat) => stat.won),
-        totalStats.totalRows,
+        stats.length,
       ),
-      totalGamesPlayed: totalStats.totalRows,
+      totalGamesPlayed: await this.playerStatsRepository.count({
+        where: { player: { discordId } },
+      }),
     };
 
     return averageStats;

@@ -423,19 +423,11 @@ export class DiscordBotService {
 
     if (!stats) {
       await interaction.reply({
-        content: 'You need at least 24 games played to see your stats.',
+        content: `You need at least ${this.playerService.minStats} games played to see your stats.`,
         ephemeral: true,
       });
       return;
     }
-
-    // if (stats.length < 24) {
-    //   await interaction.reply({
-    //     content: 'You need at least 24 games played to see your stats.',
-    //     ephemeral: true,
-    //   });
-    //   return;
-    // }
 
     const fields: APIEmbedField[] = [];
     fields.push({
@@ -476,6 +468,9 @@ export class DiscordBotService {
         name: "Strikeout's league",
         iconURL: this.logoUrl,
       })
+      .setDescription(
+        `Average stats over ${this.playerService.maxStats} games.`,
+      )
       .setThumbnail(this.logoUrl)
       .addFields(fields)
       .setFooter({
