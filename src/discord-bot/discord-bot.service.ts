@@ -447,17 +447,26 @@ export class DiscordBotService {
     });
     fields.push({
       name: 'Bombs',
-      value: typeof stats.bombs === 'number' ? `${stats.bombs}` : 'N/A',
+      value:
+        typeof stats.bombs === 'number' && !isNaN(stats.bombs)
+          ? `${stats.bombs}`
+          : 'N/A',
       inline: true,
     });
     fields.push({
       name: 'Hill Time',
-      value: typeof stats.bombs === 'number' ? `${stats.hillTime}` : 'N/A',
+      value:
+        typeof stats.hillTime === 'number' && !isNaN(stats.hillTime)
+          ? `${stats.hillTime}`
+          : 'N/A',
       inline: true,
     });
     fields.push({
       name: 'Win %',
-      value: typeof stats.bombs === 'number' ? `${stats.won * 100}%` : 'Error',
+      value:
+        typeof stats.won === 'number' && !isNaN(stats.won)
+          ? `${stats.won * 100}%`
+          : 'Error',
       inline: true,
     });
 
