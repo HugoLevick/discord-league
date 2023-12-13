@@ -62,7 +62,7 @@ export class PlayerService {
     if (!discordId) throw new BadRequestException('Discord ID is required');
     const stats = await this.playerStatsRepository.find({
       where: { player: { discordId } },
-      take: all ? undefined : 36,
+      take: all ? undefined : this.maxStats,
       order: { createdAt: 'DESC' },
     });
     return stats;
@@ -100,11 +100,11 @@ export class PlayerService {
         stats.length,
       ),
       bombs: this.getStatAverage(
-        stats.map((stat) => stat.bombs !== null),
+        stats.map((stat) => stat.bombs).filter((stat) => stat !== null),
         stats.filter((stat) => stat.bombs !== null).length,
       ),
       hillTime: this.getStatAverage(
-        stats.map((stat) => stat.hillTime !== null),
+        stats.map((stat) => stat.hillTime).filter((stat) => stat !== null),
         stats.filter((stat) => stat.hillTime !== null).length,
       ),
       won: this.getStatAverage(

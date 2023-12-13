@@ -432,24 +432,24 @@ export class DiscordBotService {
     const fields: APIEmbedField[] = [];
     fields.push({
       name: 'Downs',
-      value: `${stats.downs}`,
+      value: `${stats.downs.toFixed(1)}`,
       inline: true,
     });
     fields.push({
       name: 'Revives',
-      value: `${stats.revives}`,
+      value: `${stats.revives.toFixed(1)}`,
       inline: true,
     });
     fields.push({
       name: 'Damage',
-      value: `${stats.damage}`,
+      value: `${stats.damage.toFixed(1)}`,
       inline: true,
     });
     fields.push({
       name: 'Bombs',
       value:
         typeof stats.bombs === 'number' && !isNaN(stats.bombs)
-          ? `${stats.bombs}`
+          ? `${stats.bombs.toFixed(1)}`
           : 'N/A',
       inline: true,
     });
@@ -457,7 +457,7 @@ export class DiscordBotService {
       name: 'Hill Time',
       value:
         typeof stats.hillTime === 'number' && !isNaN(stats.hillTime)
-          ? `${stats.hillTime}`
+          ? `${stats.hillTime.toFixed(1)}`
           : 'N/A',
       inline: true,
     });
@@ -465,7 +465,7 @@ export class DiscordBotService {
       name: 'Win %',
       value:
         typeof stats.won === 'number' && !isNaN(stats.won)
-          ? `${stats.won * 100}%`
+          ? `${(stats.won * 100).toFixed(1)}%`
           : 'Error',
       inline: true,
     });
@@ -477,9 +477,7 @@ export class DiscordBotService {
         name: "Strikeout's league",
         iconURL: this.logoUrl,
       })
-      .setDescription(
-        `Average stats over ${this.playerService.maxStats} games.`,
-      )
+      .setDescription(`Average stats over ${stats.totalGamesPlayed} games.`)
       .setThumbnail(this.logoUrl)
       .addFields(fields)
       .setFooter({

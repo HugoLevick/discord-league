@@ -47,7 +47,7 @@ async function displaySearchResults(search) {
     listItem.style.cursor = 'pointer';
     listItem.innerHTML = `<strong>${user.name}</strong> (${user.discordId})`;
 
-    resultList.addEventListener('click', function (event) {
+    listItem.addEventListener('click', function (event) {
       event.preventDefault();
       discordId = user.discordId;
       afterSearchListener(user);

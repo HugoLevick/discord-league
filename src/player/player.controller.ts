@@ -29,9 +29,10 @@ export class PlayerController {
   @Auth()
   @Get('stats/:id')
   getStats(
-    @Param('id', ValidationPipe) discordId: string,
+    @Param('id') discordId: string,
     @Query('all', ParseBoolPipe) all: boolean,
   ) {
+    console.log(discordId);
     return this.playerService.getStats(discordId, all);
   }
 
@@ -43,7 +44,7 @@ export class PlayerController {
 
   @Auth()
   @Post('uploadStats/:id')
-  uploadFile(
+  uploadStats(
     @Param('id') discordId: string,
     @Body() uploadStatsDto: UploadStatsDto,
   ) {
