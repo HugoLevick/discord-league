@@ -100,11 +100,11 @@ export class PlayerService {
         stats.length,
       ),
       bombs: this.getStatAverage(
-        stats.map((stat) => stat.bombs),
+        stats.map((stat) => stat.bombs !== null),
         stats.filter((stat) => stat.bombs !== null).length,
       ),
       hillTime: this.getStatAverage(
-        stats.map((stat) => stat.hillTime),
+        stats.map((stat) => stat.hillTime !== null),
         stats.filter((stat) => stat.hillTime !== null).length,
       ),
       won: this.getStatAverage(

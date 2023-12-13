@@ -447,17 +447,17 @@ export class DiscordBotService {
     });
     fields.push({
       name: 'Bombs',
-      value: stats.bombs ? `${stats.bombs}` : 'N/A',
+      value: typeof stats.bombs === 'number' ? `${stats.bombs}` : 'N/A',
       inline: true,
     });
     fields.push({
       name: 'Hill Time',
-      value: stats.hillTime ? `${stats.hillTime}` : 'N/A',
+      value: typeof stats.bombs === 'number' ? `${stats.hillTime}` : 'N/A',
       inline: true,
     });
     fields.push({
       name: 'Win %',
-      value: stats.won ? `${stats.won * 100}%` : 'Error',
+      value: typeof stats.bombs === 'number' ? `${stats.won * 100}%` : 'Error',
       inline: true,
     });
 
