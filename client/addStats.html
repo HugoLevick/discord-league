@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>See Stats</title>
+    <title>Add Stats</title>
 
     <!-- Bootstrap CSS -->
     <link
@@ -21,10 +21,10 @@
               <a class="nav-link active" href="/">SignUps</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/">Add Stats</a>
+              <a class="nav-link active" href="#">Add Stats</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="#">See Stats</a>
+              <a class="nav-link" href="/editStats.html">See Stats</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/editMods.html">Edit Mods</a>
@@ -39,7 +39,7 @@
 
       <!-- Main Content -->
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 mt-5">
-        <h1 class="mb-4">See Stats</h1>
+        <h1 class="mb-4">Add Stats</h1>
 
         <!-- Search Form -->
         <form id="searchForm" class="mb-3">
@@ -58,10 +58,17 @@
         <div id="searchResults"></div>
 
         <br />
-        <section class="editStats" style="display: none">
+        <section class="addStats" style="display: none">
           <h1 class="mb-4" id="statsTitle">Add Stats For</h1>
 
           <form id="dataForm">
+            <button type="button" class="btn btn-success" onclick="addRow()">
+              Add Row
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save Table Data
+            </button>
+
             <table class="table" id="dataTable">
               <thead>
                 <tr>
@@ -71,11 +78,69 @@
                   <th scope="col">Bombs</th>
                   <th scope="col">Hill Time</th>
                   <th scope="col">Won?</th>
-                  <th scope="col">Date</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                <tr>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="damage"
+                      placeholder="Enter Damage"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="downs"
+                      placeholder="Enter Downs"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="revives"
+                      placeholder="Enter Revives"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="bombs"
+                      placeholder="Enter Bombs"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="hillTime"
+                      placeholder="Enter Hill Time"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      name="won"
+                    />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      onclick="removeRow(this)"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </form>
         </section>
@@ -87,79 +152,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
     <script>
-      async function afterSearchListener(user) {
-        document.getElementById('statsTitle').innerHTML =
-          'Edit Stats For ' + user.name;
-        document.getElementById('searchResults').innerHTML = '';
-        document.getElementsByClassName('editStats')[0].style.display = 'block';
-        document.getElementById('searchInput').value = '';
-
-        const table = document.getElementById('dataTable');
-        const tBody = table.querySelector('tbody');
-        tBody.innerHTML = '';
-        const stats = await fetch(
-          `/api/players/stats/${user.discordId}?all=true`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          },
-        )
-          .then((res) => res.json())
-          .catch((err) => {
-            console.error(err);
-            alert('Error getting stats');
-          });
-
-        console.log(stats);
-
-        for (const stat of stats) {
-          const newRow = tBody.insertRow(tBody.rows.length);
-
-          for (const columnIndex in columns) {
-            const column = columns[columnIndex];
-            const cell = newRow.insertCell(columnIndex);
-            const text = document.createElement('p');
-            if (column.name === 'won') {
-              text.innerHTML = stat[column.name] ? 'Yes' : 'No';
-            } else if (column.name === 'createdAt') {
-              text.innerHTML = new Date(stat[column.name]).toLocaleString(
-                undefined,
-                {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                },
-              );
-            } else {
-              text.innerHTML = stat[column.name];
-            }
-            cell.appendChild(text);
-          }
-
-          const actionCell = newRow.insertCell(columns.length);
-          const removeButton = document.createElement('button');
-          removeButton.type = 'button';
-          removeButton.className = 'btn btn-danger';
-          removeButton.textContent = 'Remove';
-          removeButton.onclick = async function () {
-            await fetch(`/api/players/stats/${stat.id}`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
-            })
-              .then((res) => res.json())
-              .catch((err) => {
-                console.error(err);
-                alert('Error deleting stat');
-              });
-            removeRow(this);
-          };
-          actionCell.appendChild(removeButton);
-        }
-      }
       const columns = [
         {
           name: 'damage',
@@ -197,13 +189,14 @@
           type: 'checkbox',
           nullable: false,
         },
-        {
-          name: 'createdAt',
-          displayName: 'Date',
-          type: 'text',
-          nullable: false,
-        },
       ]; // Number of columns in the table
+      function afterSearchListener(user) {
+        document.getElementById('statsTitle').innerHTML =
+          'Add Stats For ' + user.name;
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementsByClassName('addStats')[0].style.display = 'block';
+        document.getElementById('searchInput').value = '';
+      }
     </script>
     <script src="js/user.js"></script>
     <script src="js/statsForm.js"></script>

@@ -14,7 +14,7 @@ import { TeamI } from './interfaces/team.interface';
 import { PlayerService } from 'src/player/player.service';
 import { Player } from 'src/player/entities/player.entity';
 
-interface SignUpControlI {
+export interface SignUpControlI {
   [id: string]: PlayerI;
 }
 
@@ -127,6 +127,17 @@ export class DiscordBotService {
     client.login(process.env.DISCORD_TOKEN);
   }
 
+  public async getSignUps() {
+    const info = { signUps: this.signUps, tiers: {} };
+    for (const signUpId of Object.keys(this.signUps)) {
+      if (!this.signUps[signUpId].isIn) continue;
+      const signUp = this.signUps[signUpId];
+      if (!info.tiers[signUp.tier]) info.tiers[signUp.tier] = 0;
+      info.tiers[signUp.tier]++;
+    }
+    return info;
+  }
+
   public async signUpCommand(
     interaction: ChatInputCommandInteraction<'cached'>,
   ) {
@@ -188,13 +199,14 @@ export class DiscordBotService {
       );
 
       const tierSignUps = signUps.map(
-        (s) => `<@${s.member.id}> ${s.isIn ? '✅' : '❌'}`,
+        (s) => `<@${s.member.id}> ${s.isIn ? '✅' : '❌'}\n`,
       );
 
-      const signUpsString = tierSignUps.join(', ');
+      const signUpsString = tierSignUps.join('');
       fields.push({
         name: `Tier ${tier} (${signUps.length})`,
         value: signUpsString,
+        inline: true,
       });
     }
 
@@ -522,6 +534,42 @@ export class DiscordBotService {
 
     signUp.isIn = true;
     return true;
+  }
+
+  public async updateTier(id: string, newTier: number) {
+    if (newTier < 1) return;
+    const signUp = this.signUps[id];
+    signUp.tier = newTier;
+
+    const user = await signUp.member.guild.members.fetch({
+      user: id,
+      force: true,
+    });
+    signUp.member = user;
+
+    const lastRole = signUp.member.roles.cache.find((r) =>
+      r.name.match(/^Tier \d+/),
+    );
+    signUp.member.roles.remove(lastRole);
+
+    const newRole = signUp.member.guild.roles.cache.find(
+      (r) => r.name === `Tier ${newTier}`,
+    );
+
+    if (newRole) await signUp.member.roles.add(newRole);
+    else {
+      const newRole = await signUp.member.guild.roles.create({
+        name: `Tier ${newTier}`,
+        color: 'Blue',
+        hoist: false,
+        mentionable: false,
+      });
+      signUp.member.roles.add(newRole);
+    }
+
+    return {
+      tier: newTier,
+    };
   }
 
   private getTierFromMember(member: GuildMember) {

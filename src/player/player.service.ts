@@ -42,8 +42,11 @@ export class PlayerService {
   async searchPlayers(search: string) {
     const players = await this.playerRepository
       .createQueryBuilder('player')
-      .where('player.name ILIKE :search', { search: `%${search}%` })
-      .orWhere('player.discordId ILIKE :id', { id: `%${search}%` })
+      .where('player.discordId=:search', { search })
+      .orWhere('player.name ILIKE :search', { search: `${search}%` })
+      .orWhere('player.name ILIKE :search', { search: `%${search}%` })
+      .orWhere('player.discordId=:id', { id: search })
+      .limit(10)
       .getMany();
 
     return players;

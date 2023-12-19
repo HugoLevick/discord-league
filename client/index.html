@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Stats</title>
+    <title>SignUps</title>
 
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <script src="https://unpkg.com/feather-icons"></script>
   </head>
   <body class="container-fluid">
     <div class="row">
@@ -18,10 +19,13 @@
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link active" href="#">Add Stats</a>
+              <a class="nav-link active" href="#">SignUps</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/editStats.html">See Stats</a>
+              <a class="nav-link" href="/addStats.html">Add Stats</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/editStats.html">See Stats</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/editMods.html">Edit Mods</a>
@@ -36,110 +40,38 @@
 
       <!-- Main Content -->
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 mt-5">
-        <h1 class="mb-4">Add Stats</h1>
+        <section class="signUps">
+          <h1 class="mb-4" id="signUpTitle">SignUps</h1>
+          <div id="tierInfo"></div>
 
-        <!-- Search Form -->
-        <form id="searchForm" class="mb-3">
-          <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              id="searchInput"
-              placeholder="Search for a user..."
-            />
-            <button type="submit" class="btn btn-primary">Search</button>
-          </div>
-        </form>
-
-        <!-- Search Results -->
-        <div id="searchResults"></div>
-
-        <br />
-        <section class="addStats" style="display: none">
-          <h1 class="mb-4" id="statsTitle">Add Stats For</h1>
-
-          <form id="dataForm">
-            <button type="button" class="btn btn-success" onclick="addRow()">
-              Add Row
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Save Table Data
-            </button>
-
-            <table class="table" id="dataTable">
-              <thead>
-                <tr>
-                  <th scope="col">Damage</th>
-                  <th scope="col">Downs</th>
-                  <th scope="col">Revives</th>
-                  <th scope="col">Bombs</th>
-                  <th scope="col">Hill Time</th>
-                  <th scope="col">Won?</th>
-                  <th scope="col">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="damage"
-                      placeholder="Enter Damage"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="downs"
-                      placeholder="Enter Downs"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="revives"
-                      placeholder="Enter Revives"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="bombs"
-                      placeholder="Enter Bombs"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="hillTime"
-                      placeholder="Enter Hill Time"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      class="form-check-input"
-                      name="won"
-                    />
-                  </td>
-                  <td>
+          <table class="table" id="dataTable">
+            <thead>
+              <tr>
+                <th scope="col">Discord Name</th>
+                <th scope="col">Checked</th>
+                <th scope="col" style="width: auto">
+                  <div class="d-flex gap-4 align-items-center">
+                    Tier
+                    <select class="form-select" id="tierSelect">
+                      <option value="" selected>All</option>
+                    </select>
+                  </div>
+                </th>
+                <th scope="col">
+                  <div>
+                    Actions
                     <button
-                      type="button"
-                      class="btn btn-danger"
-                      onclick="removeRow(this)"
+                      class="btn btn-outline-secondary ms-4"
+                      onclick="reload()"
                     >
-                      Remove
+                      <i data-feather="refresh-cw" style="width: 15px"></i>
                     </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </section>
       </main>
     </div>
@@ -147,56 +79,197 @@
     <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="js/user.js"></script>
 
     <script>
+      const tierSelect = document.querySelector('#tierSelect');
+      const title = document.querySelector('#signUpTitle');
+      const tierInfo = document.querySelector('#tierInfo');
+
+      tierSelect.addEventListener('change', reload);
       const columns = [
         {
-          name: 'damage',
-          displayName: 'Damage',
-          type: 'number',
+          name: 'username',
+          displayName: 'Discord Name',
+          type: 'text',
           nullable: false,
         },
         {
-          name: 'downs',
-          displayName: 'Downs',
-          type: 'number',
+          name: 'isIn',
+          displayName: 'Checked',
+          type: 'boolean',
           nullable: false,
         },
         {
-          name: 'revives',
-          displayName: 'Revives',
+          name: 'tier',
+          displayName: 'Tier',
           type: 'number',
-          nullable: false,
-        },
-        {
-          name: 'bombs',
-          displayName: 'Bombs',
-          type: 'number',
-          nullable: true,
-        },
-        {
-          name: 'hillTime',
-          displayName: 'Hill Time',
-          type: 'number',
-          nullable: true,
-        },
-        {
-          name: 'won',
-          displayName: 'Won',
-          type: 'checkbox',
           nullable: false,
         },
       ]; // Number of columns in the table
-      function afterSearchListener(user) {
-        document.getElementById('statsTitle').innerHTML =
-          'Add Stats For ' + user.name;
-        document.getElementById('searchResults').innerHTML = '';
-        document.getElementsByClassName('addStats')[0].style.display = 'block';
-        document.getElementById('searchInput').value = '';
+
+      async function getUsers() {
+        const response = await fetch('/api/bot/signups', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
+        return data;
       }
+
+      function updateTiers(filterTier) {
+        tiers.sort((a, b) => a - b);
+        tierSelect.innerHTML = '';
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'All';
+        tierSelect.appendChild(option);
+
+        for (const tier of tiers) {
+          const option = document.createElement('option');
+          option.value = tier;
+          option.textContent = tier;
+          if (tier == filterTier) option.selected = true;
+          tierSelect.appendChild(option);
+        }
+      }
+
+      let tiers = [];
+      async function reload() {
+        title.innerHTML =
+          'SignUps <div class="spinner-grow" role="status"></div>';
+        const filterTier =
+          tierSelect.value === '' ? undefined : tierSelect.value;
+        const { signUps, tiers: tierData } = await getUsers();
+
+        let infoString = 'Sign Ups Checked In: <br/>';
+        for (const tier of Object.keys(tierData)) {
+          if (!tiers.includes(+tier)) tiers.push(+tier);
+          infoString += `Tier ${tier}: ${tierData[tier]} &nbsp;&nbsp;`;
+        }
+
+        tierInfo.innerHTML = infoString;
+
+        const tableBody = document.querySelector('#dataTable tbody');
+        tableBody.innerHTML = '';
+
+        for (const row of Object.keys(signUps)) {
+          const player = signUps[row];
+
+          if (filterTier && player.tier != filterTier) continue;
+
+          const tr = document.createElement('tr');
+
+          for (const column of columns) {
+            const td = document.createElement('td');
+            td.setAttribute('data-column', column.name);
+            const value = player[column.name];
+            if (typeof value === 'boolean') {
+              td.textContent = value ? '✅' : '❌';
+            } else {
+              td.textContent = value;
+            }
+
+            if (column.name === 'username') {
+              td.textContent = player.member.displayName;
+            }
+            tr.appendChild(td);
+          }
+
+          const td = document.createElement('td');
+          const sumButton = document.createElement('button');
+          const subtractButton = document.createElement('button');
+
+          sumButton.classList.add('btn', 'btn-outline-secondary', 'me-2');
+          const sumIcon = document.createElement('i');
+          sumIcon.setAttribute('data-feather', 'chevron-up');
+          sumButton.appendChild(sumIcon);
+          sumButton.onclick = (event) => {
+            const target = event.currentTarget;
+            target.disabled = true;
+            //Disable other button
+            subtractButton.disabled = true;
+            target.closest('button').disabled = true;
+            target.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"></div>`;
+            fetch(`/api/bot/signups/${row}/${player.tier + 1}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            })
+              .then(async (data) => {
+                const { tier } = await data.json();
+                tr.querySelector('[data-column="tier"]').innerHTML = tier;
+                if (!tiers.includes(tier)) tiers.push(tier);
+                updateTiers(filterTier);
+                player.tier++;
+              })
+              .catch((err) => {
+                console.error(err);
+                alert('Error summing tier');
+              })
+              .finally(() => {
+                target.disabled = false;
+                subtractButton.disabled = false;
+                target.innerHTML = '';
+                target.appendChild(sumIcon);
+                feather.replace();
+              });
+          };
+          td.appendChild(sumButton);
+
+          subtractButton.classList.add('btn', 'btn-outline-secondary');
+          const subIcon = document.createElement('i');
+          subIcon.setAttribute('data-feather', 'chevron-down');
+          subtractButton.appendChild(subIcon);
+          subtractButton.onclick = (event) => {
+            const target = event.currentTarget;
+            target.disabled = true;
+            //Disable other button
+            sumButton.disabled = true;
+            target.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"></div>`;
+            fetch(`/api/bot/signups/${row}/${player.tier - 1}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            })
+              .then(async (data) => {
+                const { tier } = await data.json();
+                tr.querySelector('[data-column="tier"]').innerHTML = tier;
+                if (!tiers.includes(tier)) tiers.push(tier);
+                updateTiers(filterTier);
+                player.tier--;
+              })
+              .catch((err) => {
+                console.error(err);
+                alert('Error subtracting tier');
+              })
+              .finally(() => {
+                target.disabled = false;
+                sumButton.disabled = false;
+                target.innerHTML = '';
+                target.appendChild(subIcon);
+                feather.replace();
+              });
+          };
+          td.appendChild(subtractButton);
+
+          tr.appendChild(td);
+
+          tableBody.appendChild(tr);
+        }
+
+        updateTiers(filterTier);
+        feather.replace();
+        title.innerHTML = 'SignUps';
+      }
+
+      reload();
     </script>
-    <script src="js/user.js"></script>
-    <script src="js/statsForm.js"></script>
-    <script src="js/search.js"></script>
   </body>
 </html>
